@@ -10,6 +10,8 @@
   --search-border: rgba(0, 0, 0, 0.06);
   --list-active-bg: rgba(0, 0, 0, 0.05);
   --list-hover-bg: rgba(0, 0, 0, 0.02);
+  --selected-border: rgba(0, 0, 0, 0.15);
+  --selected-bg: rgba(0, 0, 0, 0.08);
 }
 
 /* Dark theme variables */
@@ -23,6 +25,9 @@
   --search-border: rgba(255, 255, 255, 0.06);
   --list-active-bg: rgba(255, 255, 255, 0.06);
   --list-hover-bg: rgba(255, 255, 255, 0.02);
+  --selected-border: rgba(255, 255, 255, 0.15);
+  --selected-bg: rgba(255, 255, 255, 0.2);
+
 }
 
 /* Apply vars to document */

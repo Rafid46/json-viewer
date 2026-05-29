@@ -393,7 +393,7 @@ export default function JsonViewerPage() {
 
                         deleteSlot(slot.id);
                       }}
-                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -416,16 +416,6 @@ export default function JsonViewerPage() {
 
           <div className="h-20 px-6 flex items-center justify-between topbar">
             <div className="flex items-center gap-4">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center"
-                style={{
-                  backgroundColor: "#111827",
-                  border: "1px solid #374151",
-                }}
-              >
-                <FileJson className="w-7 h-7 text-white" />
-              </div>
-
               <div>
                 <h1 className="text-xl font-bold">JSON Inspector</h1>
 
@@ -694,10 +684,16 @@ export default function JsonViewerPage() {
                 return (
                   <div
                     key={index}
-                    className={`rounded-xl border p-5 ${selectedResultIndex === index ? "border-white/30 bg-white/5" : ""}`}
+                    className="rounded-xl border p-5 cursor-pointer"
                     style={{
-                      borderColor: "var(--panel-border)",
-                      backgroundColor: "var(--panel-bg)",
+                      borderColor:
+                        selectedResultIndex === index
+                          ? "var(--selected-border)"
+                          : "var(--panel-border)",
+                      backgroundColor:
+                        selectedResultIndex === index
+                          ? "var(--selected-bg)"
+                          : "var(--panel-bg)",
                     }}
                   >
                     {/* PATH */}
@@ -719,7 +715,7 @@ export default function JsonViewerPage() {
                             });
                           }, 50);
                         }}
-                        className={`break-all text-left ${theme === "light" ? "text-zinc-800" : "text-zinc-100"}`}
+                        className={`break-all text-left  cursor-pointer ${theme === "light" ? "text-zinc-800" : "text-zinc-100"}`}
                       >
                         {result.path}
                       </button>
@@ -734,21 +730,27 @@ export default function JsonViewerPage() {
                     {/* VALUE */}
 
                     <div
-                      className="mt-4 rounded-xl p-2 overflow-auto bg-white/20"
+                      className={`mt-4 rounded-xl p-2 overflow-auto ${
+                        theme === "light" ? "bg-white" : "bg-white/20"
+                      }`}
                       style={{
                         borderColor: "var(--panel-border)",
                         borderStyle: "solid",
                       }}
                     >
-                      <pre className="text-sm text-zinc-300 whitespace-pre-wrap break-all">
+                      <pre
+                        className={`text-sm whitespace-pre-wrap break-all ${
+                          theme === "light" ? "text-zinc-800" : "text-zinc-300"
+                        }`}
+                      >
                         {JSON.stringify(result.value, null, 2)}
                       </pre>
                     </div>
 
                     {/* MAPPING */}
 
-                    <div className="grid gap-4 mt-4">
-                      {/* NEXT */}
+                    {/* <div className="grid gap-4 mt-4">
+     
 
                       <div
                         className="rounded-xl"
@@ -767,7 +769,6 @@ export default function JsonViewerPage() {
                         </code>
                       </div>
 
-                      {/* VUE */}
 
                       <div
                         className="rounded-xl"
@@ -783,7 +784,7 @@ export default function JsonViewerPage() {
                           {mappings.vue}
                         </code>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 );
               })
@@ -908,7 +909,7 @@ const JsonNode = memo(function JsonNode({
               path,
             )
           }
-          className="opacity-0 group-hover:opacity-100 transition-all"
+          className="opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
         >
           {copied === path ? (
             <Check className="w-4 h-4 text-green-400" />
