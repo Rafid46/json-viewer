@@ -29,9 +29,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${jetbrains.className} h-full antialiased`}
     >
-      <body className={jetbrains.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
