@@ -9,6 +9,7 @@ import {
   ChevronUp,
   Copy,
   FileJson,
+  Minus,
   Plus,
   Palette,
   Search,
@@ -71,6 +72,8 @@ export default function JsonViewerPage() {
 
   const [objectColor, setObjectColor] = useState("#7dd3fc");
 
+  const [fontSize, setFontSize] = useState(14);
+
   /* THEME */
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     try {
@@ -80,7 +83,11 @@ export default function JsonViewerPage() {
     }
   });
 
-  const controlBg = theme === "light" ? "#f8fafc" : "var(--panel-bg)";
+  const controlBg =
+    theme === "light" ? "var(--panel-border)" : "var(--panel-bg)";
+  const controlButtonBg =
+    theme === "light" ? "var(--selected-bg)" : "rgba(255,255,255,0.08)";
+  const controlButtonText = theme === "light" ? "#1e293b" : "#d1d5db";
 
   useEffect(() => {
     try {
@@ -92,6 +99,14 @@ export default function JsonViewerPage() {
       localStorage.setItem("theme", theme);
     } catch {}
   }, [theme]);
+
+  const decreaseFontSize = () => {
+    setFontSize((size) => Math.max(12, size - 1));
+  };
+
+  const increaseFontSize = () => {
+    setFontSize((size) => Math.min(28, size + 1));
+  };
 
   /* ---------------- COPY ---------------- */
 
@@ -303,7 +318,7 @@ export default function JsonViewerPage() {
 
   return (
     <div
-      className="min-h-screen overflow-x-hidden overflow-y-visible"
+      className="h-screen flex overflow-hidden"
       style={
         {
           backgroundColor: "var(--background)",
@@ -317,263 +332,299 @@ export default function JsonViewerPage() {
         } as CSSProperties
       }
     >
-      <div className="h-screen flex">
+      {/* ========================================= */}
+      {/* LEFT SIDEBAR */}
+      {/* ========================================= */}
+
+      <div
+        className="border-r flex flex-col mt-4 w-[200px]"
+        style={{
+          backgroundColor: "var(--panel-bg)",
+          borderColor: "var(--panel-border)",
+        }}
+      >
+        {/* HEADER */}
+
+        <button
+          onClick={addSlot}
+          className="px-6 py-2 rounded-xl mx-3 flex items-center justify-center gap-2 transition-all hover:scale-105 cursor-pointer"
+          style={{
+            backgroundColor: "#111827",
+            border: "1px solid #374151",
+          }}
+        >
+          <Plus className="w-4 h-4 shrink-0 text-white" />
+          <p className="text-sm whitespace-nowrap text-white"> Add Json Slot</p>
+        </button>
+
+        {/* SLOT LIST */}
+
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#1E293B] hover:scrollbar-thumb-[#334155] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E293B] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-corner]:bg-transparent">
+          {slots.map((slot) => {
+            const active = activeSlotId === slot.id;
+
+            return (
+              <div
+                key={slot.id}
+                className={`relative group rounded-xl border cursor-pointer transition-all slot-item ${
+                  active ? "active" : ""
+                }`}
+                style={{ borderColor: "var(--panel-border)" }}
+                onClick={() => setActiveSlotId(slot.id)}
+              >
+                <div className="p-3 flex justify-between items-center gap-2">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center px-2 py-4"
+                    style={{
+                      backgroundColor: "var(--main-color-20)",
+                    }}
+                  >
+                    <FileJson
+                      className="w-5 h-5"
+                      style={{
+                        color: "var(--main-color)",
+                      }}
+                    />
+                  </div>
+
+                  <span
+                    className={`text-sm text-center whitespace-nowrap ${
+                      theme === "light" ? "text-zinc-800" : "text-zinc-300"
+                    }`}
+                  >
+                    {slot.name}
+                  </span>
+                </div>
+
+                {/* DELETE */}
+
+                {slots.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      deleteSlot(slot.id);
+                    }}
+                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* ========================================= */}
-        {/* LEFT SIDEBAR */}
+        {/* HEADER */}
         {/* ========================================= */}
 
         <div
-          className="border-r flex flex-col mt-4 min-w-0"
-          style={{
-            backgroundColor: "var(--panel-bg)",
-            borderColor: "var(--panel-border)",
-            width: 200,
-          }}
+          className="h-20 px-6 flex items-center justify-between topbar border-b"
+          style={{ borderColor: "var(--panel-border)" }}
         >
-          {/* HEADER */}
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-xl font-bold">JSON Inspector</h1>
 
-          <button
-            onClick={addSlot}
-            className="px-6 py-2 rounded-xl mx-3 flex items-center justify-center gap-2 transition-all hover:scale-105 cursor-pointer"
-            style={{
-              backgroundColor: "#111827",
-              border: "1px solid #374151",
-            }}
-          >
-            <Plus className="w-4 h-4 shrink-0 text-white" />
-            <p className="text-sm whitespace-nowrap text-white">
-              {" "}
-              Add Json Slot
-            </p>
-          </button>
+              <p
+                className={`text-xs mt-1 rounded-full px-4 py-1 w-fit ${
+                  theme === "light"
+                    ? "text-zinc-600 bg-black/10"
+                    : "text-zinc-100 bg-white/20"
+                }`}
+              >
+                Active: {activeSlot?.name}
+              </p>
+            </div>
+          </div>
 
-          {/* SLOT LIST */}
+          {/* COLORS & CONTROLS */}
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#1E293B] hover:scrollbar-thumb-[#334155] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E293B] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-corner]:bg-transparent">
-            {slots.map((slot) => {
-              const active = activeSlotId === slot.id;
+          <div className="flex items-center gap-4">
+            {/* THEME SWITCH */}
+            <div>
+              <button
+                onClick={() =>
+                  setTheme((t) => (t === "dark" ? "light" : "dark"))
+                }
+                className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
+                style={{
+                  backgroundColor: controlBg,
+                  border: "1px solid var(--panel-border)",
+                }}
+              >
+                <Palette className="w-5 h-5 text-zinc-300" />
+              </button>
+            </div>
+            {/* MAIN */}
 
-              return (
-                <div
-                  key={slot.id}
-                  className={`relative group rounded-xl border cursor-pointer transition-all slot-item ${
-                    active ? "active" : ""
-                  }`}
-                  style={{ borderColor: "var(--panel-border)" }}
-                  onClick={() => setActiveSlotId(slot.id)}
-                >
-                  <div className="p-3 flex justify-between items-center gap-2">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center px-2 py-4"
-                      style={{
-                        backgroundColor: "var(--main-color-20)",
-                      }}
-                    >
-                      <FileJson
-                        className="w-5 h-5"
-                        style={{
-                          color: "var(--main-color)",
-                        }}
-                      />
-                    </div>
+            <div
+              className="border border-white/10 rounded-xl px-3 py-2 flex items-center gap-3"
+              style={{ backgroundColor: controlBg }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="text-[11px] text-zinc-500">Main</div>
 
-                    <span
-                      className={`text-sm text-center whitespace-nowrap ${theme === "light" ? "text-zinc-800" : "text-zinc-300"}`}
-                    >
-                      {slot.name}
-                    </span>
-                  </div>
-
-                  {/* DELETE */}
-
-                  {slots.length > 1 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-
-                        deleteSlot(slot.id);
-                      }}
-                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  )}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={mainColor}
+                    onChange={(e) => setMainColor(e.target.value)}
+                    className="w-6 h-6 rounded cursor-pointer"
+                  />
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* OBJECT */}
+
+            <div
+              className="border border-white/10 rounded-xl px-3 py-2 flex items-center gap-3"
+              style={{ backgroundColor: controlBg }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="text-[11px] text-zinc-500">Object/Arrays</div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={objectColor}
+                    onChange={(e) => setObjectColor(e.target.value)}
+                    className="w-6 h-6 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SEARCH BAR */}
+
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 min-w-80">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  placeholder="Search..."
+                  spellCheck={false}
+                  className="w-full h-10 rounded-xl pl-12 pr-12 outline-none search-input"
+                />
+
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
+                      setSearchResults([]);
+                      setSelectedResultIndex(0);
+                      setHighlightedPath("");
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* PREV */}
+
+                <button
+                  onClick={() => goToSearchResult("prev")}
+                  className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5 cursor-pointer"
+                >
+                  <ChevronUp className="w-4 h-4 text-zinc-800" />
+                </button>
+
+                {/* NEXT */}
+
+                <button
+                  onClick={() => goToSearchResult("next")}
+                  className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5 cursor-pointer"
+                >
+                  <ChevronDown className="w-4 h-4 text-zinc-800" />
+                </button>
+
+                <div className="text-xs text-zinc-400 whitespace-nowrap">
+                  {searchResults.length > 0
+                    ? `${selectedResultIndex + 1} / ${searchResults.length}`
+                    : "0 / 0"}
+                </div>
+
+                {/* SEARCH */}
+
+                <button
+                  onClick={handleSearch}
+                  className="h-10 px-4 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
+                  style={{
+                    backgroundColor: "#2563EB",
+                    color: "white",
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 text-white" />
+                  Search
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* ========================================= */}
-        {/* MIDDLE INSPECTOR */}
-        {/* ========================================= */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* MIDDLE INSPECTOR */}
+          {/* ========================================= */}
 
-        <div
-          className="flex-1 border-r flex flex-col min-w-0"
-          style={{ borderColor: "var(--panel-border)" }}
-        >
-          {/* TOPBAR */}
+          <div
+            className="flex-1 border-r flex flex-col min-w-0"
+            style={{ borderColor: "var(--panel-border)" }}
+          >
+            {/* INSPECTOR CONTENT */}
 
-          <div className="h-20 px-6 flex items-center justify-between topbar">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-xl font-bold">JSON Inspector</h1>
-
-                <p
-                  className={`text-xs mt-1 rounded-full px-4 py-1 w-fit ${
-                    theme === "light"
-                      ? "text-zinc-600 bg-black/10"
-                      : "text-zinc-100 bg-white/20"
-                  }`}
-                >
-                  Active: {activeSlot?.name}
-                </p>
-              </div>
-            </div>
-
-            {/* COLORS */}
-
-            <div className="flex items-center gap-4">
-              {/* THEME SWITCH */}
-              <div>
+            <div className="flex-1 overflow-hidden flex flex-col relative">
+              {/* FONT SIZE */}
+              <div
+                className="absolute top-2 right-2 border border-white/10 rounded-xl px-3 py-2 flex items-center gap-2"
+                style={{ backgroundColor: controlBg }}
+              >
+                <div className="text-[11px] text-zinc-500">Font</div>
                 <button
-                  onClick={() =>
-                    setTheme((t) => (t === "dark" ? "light" : "dark"))
-                  }
-                  className="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer"
+                  onClick={decreaseFontSize}
+                  type="button"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer"
                   style={{
-                    backgroundColor: controlBg,
-                    border: "1px solid var(--panel-border)",
+                    backgroundColor: controlButtonBg,
+                    color: controlButtonText,
                   }}
                 >
-                  <Palette className="w-5 h-5 text-zinc-300" />
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span
+                  className="w-8 text-center text-sm"
+                  style={{ color: controlButtonText }}
+                >
+                  {fontSize}
+                </span>
+                <button
+                  onClick={increaseFontSize}
+                  type="button"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer"
+                  style={{
+                    backgroundColor: controlButtonBg,
+                    color: controlButtonText,
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
-              {/* MAIN */}
-
               <div
-                className="border border-white/10 rounded-xl px-3 py-2 flex items-center gap-3"
-                style={{ backgroundColor: controlBg }}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="text-[11px] text-zinc-500">Main</div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={mainColor}
-                      onChange={(e) => setMainColor(e.target.value)}
-                      className="w-6 h-6 rounded cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* OBJECT */}
-
-              <div
-                className="border border-white/10 rounded-xl px-3 py-2 flex items-center gap-3"
-                style={{ backgroundColor: controlBg }}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="text-[11px] text-zinc-500">Object/Arrays</div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={objectColor}
-                      onChange={(e) => setObjectColor(e.target.value)}
-                      className="w-6 h-6 rounded cursor-pointer"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-20 flex items-center search-header">
-                <div className="w-full flex gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-
-                    <input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleSearch();
-                        }
-                      }}
-                      placeholder="Search..."
-                      spellCheck={false}
-                      className="w-full h-10 rounded-xl pl-12 pr-12 outline-none search-input"
-                    />
-
-                    {search && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSearch("");
-                          setSearchResults([]);
-                          setSelectedResultIndex(0);
-                          setHighlightedPath("");
-                        }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {/* PREV */}
-
-                    <button
-                      onClick={() => goToSearchResult("prev")}
-                      className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5 cursor-pointer"
-                    >
-                      <ChevronUp className="w-4 h-4 text-zinc-800" />
-                    </button>
-
-                    {/* NEXT */}
-
-                    <button
-                      onClick={() => goToSearchResult("next")}
-                      className="w-10 h-10 bg-black/10 rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5 cursor-pointer"
-                    >
-                      <ChevronDown className="w-4 h-4 text-zinc-800" />
-                    </button>
-
-                    <div className="text-xs text-zinc-400 whitespace-nowrap">
-                      {searchResults.length > 0
-                        ? `${selectedResultIndex + 1} / ${searchResults.length}`
-                        : "0 / 0"}
-                    </div>
-
-                    {/* SEARCH */}
-
-                    <button
-                      onClick={handleSearch}
-                      className="h-10 px-4 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
-                      style={{
-                        backgroundColor: "#2563EB",
-                        color: "white",
-                      }}
-                    >
-                      <Sparkles className="w-4 h-4 text-white" />
-                      Search
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* INSPECTOR */}
-
-          {/* INSPECTOR */}
-
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div
-              className="
+                className="
     flex-1 
     overflow-y-auto overflow-x-hidden
     p-5 
@@ -596,160 +647,165 @@ export default function JsonViewerPage() {
 
     [&::-webkit-scrollbar-corner]:bg-transparent
   "
-              contentEditable
-              suppressContentEditableWarning
-              spellCheck={false}
-              onPaste={(e) => {
-                e.preventDefault();
+                style={{ fontSize: `${fontSize}px` }}
+                contentEditable
+                suppressContentEditableWarning
+                spellCheck={false}
+                onPaste={(e) => {
+                  e.preventDefault();
 
-                const text = e.clipboardData.getData("text");
+                  const text = e.clipboardData.getData("text");
 
-                updateSlotInput(text);
-              }}
-              onInput={(e) => {
-                const text = e.currentTarget.textContent || "";
+                  updateSlotInput(text);
+                }}
+                onInput={(e) => {
+                  const text = e.currentTarget.textContent || "";
 
-                updateSlotInput(text);
-              }}
-            >
-              {/* ERROR */}
-
-              {activeSlot?.jsonError && (
-                <div className="text-red-400 mb-4">{activeSlot.jsonError}</div>
-              )}
-
-              {/* EMPTY STATE */}
-
-              {!activeSlot?.jsonData && !activeSlot?.jsonError && (
-                <div className="h-full flex items-center justify-center flex-col gap-4">
-                  <div className="text-zinc-600 text-lg">
-                    Paste JSON directly here
-                  </div>
-                  <div className="text-zinc-600 text-sm">or</div>
-                  <label className="px-4 py-2 rounded-xl bg-blue-600 text-white cursor-pointer hover:bg-blue-700 transition-colors text-sm">
-                    Upload JSON File
-                    <input
-                      type="file"
-                      accept=".json,.txt"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              )}
-
-              {/* JSON VIEWER */}
-
-              {activeSlot?.jsonData && (
-                <JsonNode
-                  data={activeSlot.jsonData}
-                  name="data"
-                  path="data"
-                  highlightedPath={highlightedPath}
-                  copied={copied}
-                  onCopy={handleCopy}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================= */}
-        {/* RIGHT SEARCH PANEL */}
-        {/* ========================================= */}
-
-        <div
-          className="flex flex-col min-w-0 overflow-hidden"
-          style={{ backgroundColor: "var(--panel-bg)", width: 450 }}
-        >
-          {/* SEARCH HEADER */}
-
-          {/* SEARCH RESULTS */}
-
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#1E293B] hover:scrollbar-thumb-[#334155] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E293B] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-corner]:bg-transparent">
-            {searchResults.length === 0 ? (
-              <div
-                className="rounded-xl p-6 text-sm text-zinc-500"
-                style={{
-                  border: "1px dashed var(--panel-border)",
-                  backgroundColor: "var(--panel-bg)",
+                  updateSlotInput(text);
                 }}
               >
-                Search any key to inspect mappings
-              </div>
-            ) : (
-              searchResults.map((result, index) => {
-                const mappings = generateMappings(result.path);
+                {/* ERROR */}
 
-                return (
-                  <div
-                    key={index}
-                    className="rounded-xl border p-5 cursor-pointer"
-                    style={{
-                      borderColor:
-                        selectedResultIndex === index
-                          ? "var(--selected-border)"
-                          : "var(--panel-border)",
-                      backgroundColor:
-                        selectedResultIndex === index
-                          ? "var(--selected-bg)"
-                          : "var(--panel-bg)",
-                    }}
-                  >
-                    {/* PATH */}
+                {activeSlot?.jsonError && (
+                  <div className="text-red-400 mb-4">
+                    {activeSlot.jsonError}
+                  </div>
+                )}
 
-                    <div className="flex items-start justify-between gap-3">
-                      <button
-                        onClick={() => {
-                          setSelectedResultIndex(index);
-                          setHighlightedPath(result.path);
+                {/* EMPTY STATE */}
 
-                          setTimeout(() => {
-                            const el = document.querySelector(
-                              `[data-path="${result.path}"]`,
-                            );
-
-                            el?.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
-                          }, 50);
-                        }}
-                        className={`break-all text-left  cursor-pointer ${theme === "light" ? "text-zinc-800" : "text-zinc-100"}`}
-                      >
-                        {result.path}
-                      </button>
-
-                      <button
-                        onClick={() => handleCopy(result.path, result.path)}
-                      >
-                        <Copy className="w-4 h-4 text-zinc-400" />
-                      </button>
+                {!activeSlot?.jsonData && !activeSlot?.jsonError && (
+                  <div className="h-full flex items-center justify-center flex-col gap-4">
+                    <div className="text-zinc-600 text-lg">
+                      Paste JSON directly here
                     </div>
+                    <div className="text-zinc-600 text-sm">or</div>
+                    <label className="px-4 py-2 rounded-xl bg-blue-600 text-white cursor-pointer hover:bg-blue-700 transition-colors text-sm">
+                      Upload JSON File
+                      <input
+                        type="file"
+                        accept=".json,.txt"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                )}
 
-                    {/* VALUE */}
+                {/* JSON VIEWER */}
 
+                {activeSlot?.jsonData && (
+                  <JsonNode
+                    data={activeSlot.jsonData}
+                    name="data"
+                    path="data"
+                    highlightedPath={highlightedPath}
+                    copied={copied}
+                    onCopy={handleCopy}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ========================================= */}
+          {/* RIGHT SEARCH PANEL */}
+          {/* ========================================= */}
+
+          <div
+            className="flex flex-col min-w-0 overflow-hidden"
+            style={{ backgroundColor: "var(--panel-bg)", width: 450 }}
+          >
+            {/* SEARCH HEADER */}
+
+            {/* SEARCH RESULTS */}
+
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#1E293B] hover:scrollbar-thumb-[#334155] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#1E293B] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-corner]:bg-transparent">
+              {searchResults.length === 0 ? (
+                <div
+                  className="rounded-xl p-6 text-sm text-zinc-500"
+                  style={{
+                    border: "1px dashed var(--panel-border)",
+                    backgroundColor: "var(--panel-bg)",
+                  }}
+                >
+                  Search any key to inspect mappings
+                </div>
+              ) : (
+                searchResults.map((result, index) => {
+                  const mappings = generateMappings(result.path);
+
+                  return (
                     <div
-                      className={`mt-4 rounded-xl p-2 overflow-auto ${
-                        theme === "light" ? "bg-white" : "bg-white/20"
-                      }`}
+                      key={index}
+                      className="rounded-xl border p-5 cursor-pointer"
                       style={{
-                        borderColor: "var(--panel-border)",
-                        borderStyle: "solid",
+                        borderColor:
+                          selectedResultIndex === index
+                            ? "var(--selected-border)"
+                            : "var(--panel-border)",
+                        backgroundColor:
+                          selectedResultIndex === index
+                            ? "var(--selected-bg)"
+                            : "var(--panel-bg)",
                       }}
                     >
-                      <pre
-                        className={`text-sm whitespace-pre-wrap break-all ${
-                          theme === "light" ? "text-zinc-800" : "text-zinc-300"
+                      {/* PATH */}
+
+                      <div className="flex items-start justify-between gap-3">
+                        <button
+                          onClick={() => {
+                            setSelectedResultIndex(index);
+                            setHighlightedPath(result.path);
+
+                            setTimeout(() => {
+                              const el = document.querySelector(
+                                `[data-path="${result.path}"]`,
+                              );
+
+                              el?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                            }, 50);
+                          }}
+                          className={`break-all text-left  cursor-pointer ${theme === "light" ? "text-zinc-800" : "text-zinc-100"}`}
+                        >
+                          {result.path}
+                        </button>
+
+                        <button
+                          onClick={() => handleCopy(result.path, result.path)}
+                        >
+                          <Copy className="w-4 h-4 text-zinc-400" />
+                        </button>
+                      </div>
+
+                      {/* VALUE */}
+
+                      <div
+                        className={`mt-4 rounded-xl p-2 overflow-auto ${
+                          theme === "light" ? "bg-white" : "bg-white/20"
                         }`}
+                        style={{
+                          borderColor: "var(--panel-border)",
+                          borderStyle: "solid",
+                        }}
                       >
-                        {JSON.stringify(result.value, null, 2)}
-                      </pre>
-                    </div>
+                        <pre
+                          className={`text-sm whitespace-pre-wrap break-all ${
+                            theme === "light"
+                              ? "text-zinc-800"
+                              : "text-zinc-300"
+                          }`}
+                        >
+                          {JSON.stringify(result.value, null, 2)}
+                        </pre>
+                      </div>
 
-                    {/* MAPPING */}
+                      {/* MAPPING */}
 
-                    {/* <div className="grid gap-4 mt-4">
+                      {/* <div className="grid gap-4 mt-4">
      
 
                       <div
@@ -785,10 +841,11 @@ export default function JsonViewerPage() {
                         </code>
                       </div>
                     </div> */}
-                  </div>
-                );
-              })
-            )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       </div>
