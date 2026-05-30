@@ -224,6 +224,16 @@ export default function JsonViewerPage() {
     currentPath = "data",
   ): SearchResult[] => {
     const results: SearchResult[] = [];
+    const normalizedKeyword = keyword
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/gi, " ")
+      .trim();
+    const queryTokens = normalizedKeyword.split(" ").filter(Boolean);
+
+    const matchesQuery = (text: string) => {
+      const haystack = text.toLowerCase();
+      return queryTokens.every((token) => haystack.includes(token));
+    };
 
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
@@ -236,8 +246,11 @@ export default function JsonViewerPage() {
     if (typeof obj === "object" && obj !== null) {
       Object.entries(obj).forEach(([key, value]) => {
         const path = `${currentPath}.${key}`;
+        const valueText =
+          typeof value !== "object" || value === null ? String(value) : "";
+        const matches = matchesQuery(`${key} ${valueText}`);
 
-        if (key.toLowerCase().includes(keyword.toLowerCase())) {
+        if (matches) {
           results.push({
             path,
             value,
@@ -245,6 +258,15 @@ export default function JsonViewerPage() {
         }
 
         results.push(...searchJson(value, keyword, path));
+      });
+
+      return results;
+    }
+
+    if (matchesQuery(String(obj))) {
+      results.push({
+        path: currentPath,
+        value: obj,
       });
     }
 
@@ -731,7 +753,7 @@ export default function JsonViewerPage() {
                     backgroundColor: "var(--panel-bg)",
                   }}
                 >
-                  Search any key to inspect mappings
+                  Search any key or value to inspect mappings
                 </div>
               ) : (
                 searchResults.map((result, index) => {
