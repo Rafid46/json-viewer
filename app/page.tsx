@@ -422,15 +422,17 @@ export default function JsonViewerPage() {
         {/* ========================================= */}
 
         <div
-          className="h-20 px-6 flex items-center justify-between topbar border-b"
+          className="h-auto min-h-[80px] px-6 py-4 md:py-0 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b"
           style={{ borderColor: "var(--panel-border)" }}
         >
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-xl font-bold">JSON Inspector</h1>
+              <h1 className="text-xl font-bold whitespace-nowrap">
+                JSON Inspector
+              </h1>
 
               <p
-                className={`text-xs mt-1 rounded-full px-4 py-1 w-fit ${
+                className={`text-xs mt-1 rounded-full px-4 py-1 w-fit whitespace-nowrap ${
                   theme === "light"
                     ? "text-zinc-600 bg-black/10"
                     : "text-zinc-100 bg-white/20"
@@ -439,11 +441,11 @@ export default function JsonViewerPage() {
                 Active: {activeSlot?.name}
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* COLORS & CONTROLS */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-3 w-full">
             {/* THEME SWITCH */}
             <div>
               <button
@@ -501,8 +503,8 @@ export default function JsonViewerPage() {
 
             {/* SEARCH BAR */}
 
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 min-w-80">
+            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
+              <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
 
                 <input
@@ -534,7 +536,7 @@ export default function JsonViewerPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-row items-center gap-2 w-full md:w-auto">
                 {/* PREV */}
 
                 <button
@@ -714,7 +716,7 @@ export default function JsonViewerPage() {
 
           <div
             className="flex flex-col min-w-0 overflow-hidden"
-            style={{ backgroundColor: "var(--panel-bg)", width: 450 }}
+            style={{ backgroundColor: "var(--panel-bg)", width: 350 }}
           >
             {/* SEARCH HEADER */}
 
